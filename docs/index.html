@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MABT anchors adversarial trajectories to data manifolds for transferable attacks. NeurIPS 2026 Spotlight.">
+  <title>MABT | NeurIPS 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="wordmark" href="#top">MABT</a>
+    <nav aria-label="Section navigation">
+      <a href="#overview">Overview</a><a href="#method">Method</a><a href="#results">Results</a><a href="#analysis">Analysis</a><a href="#citation">Citation</a>
+    </nav>
+  </header>
+  <main id="top">
+    <section class="hero" aria-labelledby="paper-title">
+      <p class="eyebrow">NeurIPS 2026 · Spotlight</p>
+      <h1 id="paper-title">Anchoring Adversarial Trajectories to Data Manifolds: A Bilevel Transfer Optimization Framework</h1>
+      <p class="authors">Yaohua Liu<sup>1</sup>, Yifan Guo<sup>2</sup>, and Jiaxin Gao<sup>3,*</sup></p>
+      <p class="affiliations"><span><sup>1</sup> The University of Hong Kong</span><span><sup>2</sup> Dalian University of Technology</span><span><sup>3</sup> The Hong Kong Polytechnic University</span></p>
+      <p class="correspondence">* Corresponding author</p>
+      <div class="links" aria-label="Project links">
+        <a class="link-button primary" href="https://arxiv.org/abs/2609.38991">Paper · arXiv</a>
+        <a class="link-button" href="https://github.com/callous-youth/MABT">Code repository</a>
+        <a class="link-button" href="#citation">BibTeX</a>
+      </div>
+      <p class="code-status">Full implementation and instructions are coming soon.</p>
+    </section>
+
+    <section class="hero-visual" aria-label="Motivation">
+      <figure>
+        <img src="assets/motivation.png" alt="Three panels showing natural images on a manifold, ordinary attack trajectories drifting away from it, and MABT anchoring trajectories toward shared decision boundaries.">
+        <figcaption><strong>Motivation.</strong> Standard iterative attacks may drift toward surrogate-specific directions. MABT anchors the trajectory to a shared semantic subspace to improve transfer to unseen models.</figcaption>
+      </figure>
+    </section>
+
+    <section class="metrics" aria-label="Evaluation at a glance">
+      <div><strong>12</strong><span>victim models across three families</span></div>
+      <div><strong>28</strong><span>attack configurations</span></div>
+      <div><strong>+16.76 pp</strong><span>average ASR gain across the 16 main-table configurations</span></div>
+      <div><strong>+16.07 pp</strong><span>ASR gain over BETAK with GAA</span></div>
+    </section>
+
+    <section class="intro" id="overview">
+      <p class="section-kicker">Overview</p>
+      <p class="lead">MABT anchors adversarial trajectories to data manifolds to improve transfer across models.</p>
+      <p>MABT combines manifold anchoring with distributional bilevel optimization. The manifold anchoring projector (MAP) rectifies attack states, while the bilevel formulation learns an initialization under local surrogate uncertainty. Together, they guide the subsequent attack toward directions that transfer beyond a single surrogate.</p>
+    </section>
+
+    <section class="content-section" id="method">
+      <div class="section-heading split-heading"><div><p class="section-kicker">Method</p><h2>Anchor the trajectory. Learn the initialization.</h2></div><p>MABT integrates geometric trajectory guidance and transfer-aware initialization in a practical two-stage procedure.</p></div>
+      <div class="method-detail">
+        <article><p class="section-kicker">01 · Manifold anchoring projector</p><h3>Keep the trajectory aligned</h3>
+          <p>MAP balances fidelity to the current attack state with a manifold prior, while the feasible set retains the perturbation constraint. This is the ideal variational formulation; practical operators such as Resize provide efficient approximations to the anchoring effect.</p>
+          <div class="equation-scroll"><img class="equation" src="assets/equation-map.png" alt="MAP is the constrained minimizer of fidelity potential plus manifold prior."></div>
+        </article>
+        <article><p class="section-kicker">02 · Distributional bilevel optimization</p><h3>Learn a transferable initialization</h3>
+          <p>The lower level produces an anchored perturbation from the initialization; the upper level selects an initialization by evaluating the resulting perturbation under a distribution of surrogate variants.</p>
+          <div class="equation-scroll"><img class="equation" src="assets/equation-dbo.png" alt="Bilevel formulation: minimize negative distributional risk subject to an anchored lower-level attack objective."></div>
+          <p>The distributional risk is evaluated on the unanchored input x + δ, consistent with the camera-ready formulation:</p>
+          <div class="equation-scroll"><img class="equation equation-risk" src="assets/equation-risk.png" alt="Distributional risk is the expected loss of surrogate variants evaluated on x plus delta."></div>
+        </article>
+        <article><p class="section-kicker">03 · Hessian-free solver</p><h3>Optimize with first-order gradients</h3>
+          <p>A one-step probe approximates the gap correction, avoiding Hessian-vector products. The resulting initialization is used by the final manifold-anchored attack.</p>
+          <div class="equation-scroll"><img class="equation" src="assets/equation-gradient.png" alt="First-order meta-gradient approximation: distributional risk gradient minus the gap-gradient estimate."></div>
+          <figure class="paper-figure"><div class="wide-figure"><img src="assets/algorithm.png" alt="Algorithm 1 from the paper: manifold-constrained bilevel learning followed by manifold adversarial adaptation."></div><figcaption>Algorithm 1 from the camera-ready paper. Stage I learns an initialization; Stage II performs the final attack.</figcaption></figure>
+        </article>
+      </div>
+    </section>
+
+    <section class="content-section" id="results">
+      <div class="section-heading split-heading"><div><p class="section-kicker">ImageNet Transfer</p><h2>Stronger transfer across base attackers.</h2></div><p>Selected results from the paper: untargeted attacks generated on ResNet-50 and evaluated against 12 unseen victims. ASR is averaged across all victims; higher is stronger.</p></div>
+      <p class="result-intro">Across the 16 configurations in the main table, mean ASR increases from 22.52% to 39.28% (+16.76 percentage points). The table below retains the per-victim results and comparisons with GHOST, MBA, and AWT.</p>
+      <figure class="paper-figure"><div class="wide-figure"><img src="assets/main-results.png" alt="Full ImageNet classification results on twelve victim models for sixteen attack configurations."></div><figcaption><strong>Classification transfer.</strong> Table 1 in the paper: 5,000 ImageNet images, a ResNet-50 surrogate, and 12 victims spanning CNNs, robust ensembles, and Transformers. Each Ours row adds MABT to the preceding configuration. ASR (%) ↑.</figcaption></figure>
+      <div class="result-pair">
+        <figure class="paper-figure"><div class="wide-figure"><img src="assets/defense-results.png" alt="Full attack success rates against five defense mechanisms for PGD, MI, TI and GAA."></div><figcaption><strong>Transfer against defenses.</strong> The paper evaluates HGD, JPEG, RS, R&amp;P, and NIPS-r3; MABT improves the aggregate ASR across the reported configurations.</figcaption></figure>
+        <figure class="paper-figure compact-figure"><div class="wide-figure"><img src="assets/betak-results.png" alt="BETAK and MABT comparison over CNN, CNN ensemble and Transformer victims."></div><figcaption><strong>Initialization-based comparison.</strong> With GAA, MABT reaches 49.33% average ASR versus 33.26% for BETAK. BETAK uses an auxiliary Inc-v3 pseudo-victim.</figcaption></figure>
+      </div>
+      <details class="more-results"><summary>Additional attack variants, VGG-19 surrogate, and targeted transfer</summary>
+        <figure class="paper-figure"><div class="wide-figure"><img src="assets/additional-attacks.png" alt="Additional untargeted transfer results for VMI, DI and SI on ResNet-50."></div><figcaption><strong>Additional attackers.</strong> The complete 12 configurations with VMI, DI and SI on ResNet-50 (appendix Table 6).</figcaption></figure>
+        <figure class="paper-figure"><div class="wide-figure"><img src="assets/vgg-results.png" alt="Untargeted transfer results using a VGG-19 surrogate."></div><figcaption><strong>Cross-surrogate transfer.</strong> Results using VGG-19 as the surrogate (appendix Table 7).</figcaption></figure>
+        <figure class="paper-figure"><div class="wide-figure"><img src="assets/targeted-results.png" alt="Targeted transfer results using a ResNet-50 surrogate."></div><figcaption><strong>Targeted transfer.</strong> Results remain challenging in absolute ASR, while MABT improves the corresponding attacks under this protocol (appendix Table 8).</figcaption></figure>
+      </details>
+    </section>
+
+    <section class="content-section" id="analysis">
+      <div class="section-heading split-heading"><div><p class="section-kicker">Analysis</p><h2>Geometry, transfer and efficiency.</h2></div><p>We examine the transfer behavior of the learned trajectory through loss landscapes, victim-side feature shifts, and computational trade-offs.</p></div>
+      <h3>What do MAP and DBO contribute?</h3>
+      <p class="result-intro">Both components improve the PGD baseline individually; combining them yields the highest average ASR for each of the four model-related configurations shown.</p>
+      <figure class="paper-figure"><div class="wide-figure"><img src="assets/component-results.png" alt="Full component ablation comparing MAP only, DBO only and their combination for PGD with N/A, GHOST, MBA and AWT."></div><figcaption><strong>Component attribution.</strong> PGD is the common base attacker; the four groups use no additional method, GHOST, MBA, and AWT, respectively. Values are ASR (%) on the 12 victim models.</figcaption></figure>
+      <h3>How do practical MAP choices compare?</h3>
+      <p class="result-intro">The historical full MAP ablation compares explicit, discriminative, and generative realizations under PGD. Resize gives a low-cost choice; diffusion-based realizations achieve higher ASR at higher computational cost.</p>
+      <div class="table-frame"><div class="table-scroll"><table class="map-table"><thead><tr><th scope="col">MAP</th><th scope="col">Inc-v3</th><th scope="col">Inc-Res-v2</th><th scope="col">DenseNet</th><th scope="col">MobileNet</th><th scope="col">PNASNet</th><th scope="col">SENet</th><th scope="col">Inc-v3 ens3</th><th scope="col">Inc-v3 ens4</th><th scope="col">IncRes-v2 ens</th><th scope="col">Visformer-s</th><th scope="col">DeiT-s</th><th scope="col">ConViT-b</th><th scope="col">Avg.</th></tr></thead><tbody>
+      <tr><th>N/A</th><td>16.38</td><td>13.04</td><td>37.52</td><td>36.50</td><td>12.80</td><td>17.10</td><td>10.18</td><td>9.40</td><td>5.86</td><td>10.98</td><td>7.50</td><td>5.56</td><td>15.24</td></tr>
+      <tr><th>FFT</th><td>32.42</td><td>23.00</td><td>64.06</td><td>64.22</td><td>24.34</td><td>28.66</td><td>17.96</td><td>15.18</td><td>8.98</td><td>14.44</td><td>10.90</td><td>7.12</td><td>25.94</td></tr>
+      <tr><th>Bit-Depth</th><td>34.68</td><td>25.50</td><td>69.78</td><td>70.78</td><td>25.38</td><td>33.76</td><td>19.08</td><td>15.44</td><td>9.50</td><td>20.28</td><td>11.08</td><td>7.50</td><td>28.56</td></tr>
+      <tr><th>Resize</th><td>34.96</td><td>24.58</td><td>70.00</td><td>69.22</td><td>27.84</td><td>33.94</td><td>19.72</td><td>16.38</td><td>10.28</td><td>17.02</td><td>11.54</td><td>7.62</td><td>28.59</td></tr>
+      <tr><th>DnCNN</th><td>24.62</td><td>16.92</td><td>56.50</td><td>59.88</td><td>16.12</td><td>23.96</td><td>12.94</td><td>10.54</td><td>6.10</td><td>13.56</td><td>8.36</td><td>5.86</td><td>21.28</td></tr>
+      <tr><th>OFA-S</th><td>31.20</td><td>23.08</td><td>57.32</td><td>59.48</td><td>22.04</td><td>26.16</td><td>19.76</td><td>17.82</td><td>11.06</td><td>16.72</td><td>11.72</td><td>8.46</td><td>25.40</td></tr>
+      <tr><th>SD-v1.5</th><td>41.68</td><td>31.44</td><td>73.82</td><td>71.16</td><td>34.74</td><td>37.80</td><td>25.14</td><td>21.08</td><td>12.86</td><td>20.58</td><td>13.20</td><td>9.32</td><td>32.74</td></tr>
+      <tr><th>Tiny-SD</th><td>42.16</td><td>31.46</td><td>72.84</td><td>71.30</td><td>35.00</td><td>38.14</td><td>25.98</td><td>21.58</td><td>13.72</td><td>20.90</td><td>13.78</td><td>9.86</td><td class="ours">33.06</td></tr>
+      </tbody></table></div><p class="table-note">ASR (%) ↑; values from the earlier full MAP-ablation table retained in the manuscript source. The full table is not included in the current camera-ready PDF; its efficiency comparison is shown below.</p></div>
+      <h3 class="subheading">Hyperparameter sensitivity</h3><p class="result-intro">The appendix evaluates warm-up steps T, lower-level step size β, and gap coefficient λ on both ResNet-50 and VGG-19 surrogates.</p>
+      <div class="hyper-grid"><figure><img src="assets/hyperparam-T.png" alt="Effect of T on ResNet-50."><figcaption>T · ResNet-50</figcaption></figure><figure><img src="assets/hyperparameter-T-vgg.png" alt="Effect of T on VGG-19."><figcaption>T · VGG-19</figcaption></figure><figure><img src="assets/hyperparameter-beta-nips.png" alt="Effect of beta on ResNet-50."><figcaption>β · ResNet-50</figcaption></figure><figure><img src="assets/hyperparameter-beta-vgg-nips.png" alt="Effect of beta on VGG-19."><figcaption>β · VGG-19</figcaption></figure><figure><img src="assets/hyperparam-lambda.png" alt="Effect of lambda on ResNet-50."><figcaption>λ · ResNet-50</figcaption></figure><figure><img src="assets/hyperparameter-lambda-vgg.png" alt="Effect of lambda on VGG-19."><figcaption>λ · VGG-19</figcaption></figure></div>
+      <h3 class="subheading">Understanding the trajectory</h3>
+      <figure class="figure-block"><img src="assets/landscape.png" alt="Adversarial loss landscapes comparing baseline attacks and MABT across surrogate and victim models."><figcaption><strong>Loss landscapes.</strong> MABT maintains higher victim-side loss basins with relatively flatter surrounding curvature in the illustrated examples.</figcaption></figure>
+      <div class="analysis-grid">
+        <figure><img src="assets/feature-shift.png" alt="Surrogate feature shift plotted against average victim feature shift for PGD, MAP, and MAP with DBO."><figcaption><strong>Feature-shift consistency.</strong> The analysis compares surrogate-side shifts with the average response of four heterogeneous victim models.</figcaption></figure>
+        <figure><img src="assets/efficiency.png" alt="Surrogate and victim loss curves alongside a performance and running-time comparison of MAP realizations."><figcaption><strong>Convergence and cost.</strong> The paper compares optimization behavior and the performance–efficiency trade-off of different MAP realizations.</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="citation" id="citation"><p class="section-kicker">Citation</p><h2>BibTeX</h2>
+      <pre><code>@inproceedings{liu2026anchoring,
+  title     = {Anchoring Adversarial Trajectories to Data Manifolds:
+               A Bilevel Transfer Optimization Framework},
+  author    = {Liu, Yaohua and Guo, Yifan and Gao, Jiaxin},
+  booktitle = {Advances in Neural Information Processing Systems},
+  year      = {2026},
+  url       = {https://arxiv.org/abs/2609.38991}
+}</code></pre>
+    </section>
+  </main>
+  <footer><span>MABT</span><span>NeurIPS 2026</span><a href="https://github.com/callous-youth/MABT">GitHub</a></footer>
+</body>
+</html>
