@@ -27,3 +27,8 @@ h1,h2 { letter-spacing:0; } h1 { max-width:1400px; margin:0 auto 20px; font:600 
 @media (max-width:800px) { #method .split-heading { grid-template-columns:1fr; } }
 @media (max-width:800px) { .solver-grid,.result-cards,.trajectory-grid,.efficiency-panel,.algorithm-pair,.result-gallery,.trajectory-bottom { grid-template-columns:1fr; }.evidence-strip { grid-template-columns:1fr 1fr; }.evidence-strip div:nth-child(3) { border-left:0; border-top:1px solid var(--line); }.evidence-strip div:nth-child(4) { border-top:1px solid var(--line); } }
 @media (max-width:600px) { .hyper-grid { grid-template-columns:1fr; }.equation { min-width:620px; }.equation-scroll { padding:12px; } }
+
+/* Keep the three-panel convergence-and-cost visual as one complete analytical unit. */
+.efficiency-figure { margin:0; padding:22px 0 0; border-top:1px solid var(--line); }
+.efficiency-figure img { display:block; width:100%; height:auto; }
+.efficiency-figure figcaption { max-width:920px; padding-top:12px; }
